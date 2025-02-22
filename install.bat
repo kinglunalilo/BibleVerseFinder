@@ -12,10 +12,10 @@ if %ERRORLEVEL% NEQ 0 (
     exit /b 1
 )
 
-REM Define file URLs (replace with actual URLs to your files)
-set "SEARCH_SCRAPER_URL=https://example.com/path/to/search_scraper.py"
-set "START_VBS_URL=https://example.com/path/to/start.vbs"
-set "INIT_PY_URL=https://example.com/path/to/__init__.py"
+REM Define file URLs using your GitHub repository
+set "SEARCH_SCRAPER_URL=https://raw.githubusercontent.com/kinglunalilo/BibleVerseFinder/main/search_scraper.py"
+set "START_VBS_URL=https://raw.githubusercontent.com/kinglunalilo/BibleVerseFinder/main/start.vbs"
+set "INIT_PY_URL=https://raw.githubusercontent.com/kinglunalilo/BibleVerseFinder/main/__init__.py"
 
 REM Create the BibleVerseFinder folder
 if not exist "BibleVerseFinder" mkdir "BibleVerseFinder"
