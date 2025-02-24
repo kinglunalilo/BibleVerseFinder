@@ -51,6 +51,12 @@ If you prefer to manually set up the program:
 - Check that all required packages are installed
 - Verify all files are in the same directory
 
+## Support the Project
+If you find this tool helpful, consider supporting its development:
+
+- Venmo: @lilow
+- Or scan the QR code in the program's About dialog
+
 ## Requirements
 - Windows 7 or higher
 - Python 3.11.4 or higher
@@ -62,3 +68,13 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## Support
 For issues or questions, please open an issue in this repository.
+
+## Support the Developer
+
+If you find this application helpful and would like to support its development, you can donate through Venmo:
+
+![Venmo QR Code](qr.png)
+
+Or visit: [https://venmo.com/lilow](https://venmo.com/lilow)
+
+Your support helps maintain and improve this application. Thank you! 🙏

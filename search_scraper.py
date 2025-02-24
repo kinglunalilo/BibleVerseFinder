@@ -341,15 +341,60 @@ class BibleVerseFinder:
         messagebox.showerror("Error", error_message)
 
     def show_about(self):
-        about_text = """Bible Verse Finder
-
-Verse data provided by OpenBible.info
-Verses are sorted by relevance, with community-voted most relevant verses appearing first.
-
-This program uses the English Standard Version (ESV) of the Bible.
-Visit OpenBible.info for more Bible study resources."""
-
-        messagebox.showinfo("About Bible Verse Finder", about_text)
+        # Create a custom about dialog
+        about_dialog = tk.Toplevel(self.root)
+        about_dialog.title("About Bible Verse Finder")
+        about_dialog.geometry("400x500")
+        about_dialog.resizable(False, False)
+        
+        # Add padding frame
+        main_frame = ttk.Frame(about_dialog, padding="20")
+        main_frame.pack(fill=tk.BOTH, expand=True)
+        
+        # Program info
+        ttk.Label(main_frame, 
+                 text="Bible Verse Finder",
+                 font=('Arial', 16, 'bold')).pack(pady=(0,10))
+        
+        # Version info and description
+        ttk.Label(main_frame, 
+                 text="Version 1.0\n\n" +
+                      "Verse data provided by OpenBible.info\n" +
+                      "Verses are from English Standard Version (ESV)",
+                 justify=tk.CENTER).pack(pady=(0,20))
+        
+        # Donation section
+        ttk.Label(main_frame,
+                 text="Support this project",
+                 font=('Arial', 12, 'bold')).pack(pady=(0,10))
+        
+        # Venmo button
+        def open_venmo():
+            # Replace with your Venmo username
+            webbrowser.open("https://venmo.com/lilow")
+        
+        venmo_frame = ttk.Frame(main_frame)
+        venmo_frame.pack(pady=(0,20))
+        
+        ttk.Button(venmo_frame,
+                  text="Donate with Venmo",
+                  command=open_venmo).pack(side=tk.LEFT, padx=5)
+        
+        # If you have a Venmo QR code image
+        try:
+            qr_image = PhotoImage(file="qr.png")  # Changed from venmo_qr.png to qr.png
+            qr_label = ttk.Label(main_frame, image=qr_image)
+            qr_label.image = qr_image  # Keep a reference
+            qr_label.pack(pady=(0,20))
+        except:
+            ttk.Label(main_frame,
+                     text="Scan Venmo QR code\nor visit venmo.com/YOUR_USERNAME",
+                     justify=tk.CENTER).pack(pady=(0,20))
+        
+        # Close button
+        ttk.Button(main_frame,
+                  text="Close",
+                  command=about_dialog.destroy).pack(pady=(10,0))
 
     def perform_search(self):
         # Show progress bar
@@ -575,4 +620,4 @@ def main():
         sys.exit(1)
 
 if __name__ == "__main__":
-    main() 
+    main()
