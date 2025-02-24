@@ -17,6 +17,9 @@ class BibleVerseFinder:
         self.root.title("Bible Verse Finder")
         self.root.geometry("800x600")
         
+        # Center the main window
+        self.center_window(self.root)
+        
         # Initialize history and favorites
         self.search_history = []
         self.favorites = self.load_favorites()
@@ -127,6 +130,24 @@ class BibleVerseFinder:
                 'integrity', 'discipline', 'responsibility'
             ]
         }
+
+        # Add donation button after search frame
+        donation_frame = ttk.Frame(self.main_frame)
+        donation_frame.pack(fill=tk.X, pady=(0, 10))
+        
+        donate_button = ttk.Button(
+            donation_frame,
+            text="❤ Support this Project",
+            command=self.show_donation,
+            style='Donation.TButton'
+        )
+        donate_button.pack(side=tk.RIGHT)
+        
+        # Configure donation button style
+        style = ttk.Style()
+        style.configure('Donation.TButton', 
+                       font=('Arial', 10),
+                       foreground='#d62828')
 
     def create_menu(self):
         menubar = tk.Menu(self.root)
@@ -341,10 +362,9 @@ class BibleVerseFinder:
         messagebox.showerror("Error", error_message)
 
     def show_about(self):
-        # Create a custom about dialog
         about_dialog = tk.Toplevel(self.root)
         about_dialog.title("About Bible Verse Finder")
-        about_dialog.geometry("400x500")
+        about_dialog.geometry("400x600")
         about_dialog.resizable(False, False)
         
         # Add padding frame
@@ -382,19 +402,32 @@ class BibleVerseFinder:
         
         # If you have a Venmo QR code image
         try:
-            qr_image = PhotoImage(file="qr.png")  # Changed from venmo_qr.png to qr.png
-            qr_label = ttk.Label(main_frame, image=qr_image)
-            qr_label.image = qr_image  # Keep a reference
-            qr_label.pack(pady=(0,20))
-        except:
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            qr_path = os.path.join(script_dir, "qr.png")
+            
+            if os.path.exists(qr_path):
+                qr_image = PhotoImage(file=qr_path)
+                qr_button = ttk.Label(main_frame, image=qr_image, cursor="hand2")
+                qr_button.image = qr_image
+                qr_button.pack(pady=(0,10))
+                qr_button.bind("<Button-1>", lambda e: webbrowser.open("https://venmo.com/lilow"))
+                
+                ttk.Label(main_frame,
+                         text="Click QR code or scan with your phone",
+                         justify=tk.CENTER).pack()
+        except Exception as e:
+            print(f"Error loading QR code: {e}")
             ttk.Label(main_frame,
-                     text="Scan Venmo QR code\nor visit venmo.com/YOUR_USERNAME",
-                     justify=tk.CENTER).pack(pady=(0,20))
+                     text="Error loading QR code",
+                     justify=tk.CENTER).pack()
         
         # Close button
         ttk.Button(main_frame,
                   text="Close",
                   command=about_dialog.destroy).pack(pady=(10,0))
+        
+        # Center the dialog
+        self.center_window(about_dialog)
 
     def perform_search(self):
         # Show progress bar
@@ -609,6 +642,77 @@ class BibleVerseFinder:
         
         # Perform search
         self.perform_search()
+
+    def show_donation(self):
+        """Show donation options dialog"""
+        donation_dialog = tk.Toplevel(self.root)
+        donation_dialog.title("Support Bible Verse Finder")
+        donation_dialog.geometry("400x600")
+        donation_dialog.resizable(False, False)
+        
+        main_frame = ttk.Frame(donation_dialog, padding="20")
+        main_frame.pack(fill=tk.BOTH, expand=True)
+        
+        ttk.Label(main_frame, 
+                 text="Support this Project",
+                 font=('Arial', 16, 'bold')).pack(pady=(0,10))
+        
+        ttk.Label(main_frame,
+                 text="Your support helps maintain and improve\nthis Bible study tool.",
+                 justify=tk.CENTER).pack(pady=(0,20))
+        
+        # QR Code Frame
+        qr_frame = ttk.Frame(main_frame)
+        qr_frame.pack(pady=(0,20))
+        
+        # Load and display QR code
+        try:
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            qr_path = os.path.join(script_dir, "qr.png")
+            
+            if os.path.exists(qr_path):
+                # Create clickable QR code
+                qr_image = PhotoImage(file=qr_path)
+                qr_button = ttk.Label(qr_frame, image=qr_image, cursor="hand2")
+                qr_button.image = qr_image  # Keep reference
+                qr_button.pack(pady=(0,10))
+                qr_button.bind("<Button-1>", lambda e: webbrowser.open("https://venmo.com/lilow"))
+                
+                ttk.Label(qr_frame,
+                         text="Click QR code or scan with your phone",
+                         justify=tk.CENTER).pack()
+            else:
+                ttk.Label(qr_frame,
+                         text="QR code not found",
+                         justify=tk.CENTER).pack()
+        except Exception as e:
+            print(f"Error loading QR code: {e}")
+            ttk.Label(qr_frame,
+                     text="Error loading QR code",
+                     justify=tk.CENTER).pack()
+        
+        # Regular Venmo button as backup
+        ttk.Button(main_frame,
+                  text="Open Venmo Website",
+                  command=lambda: webbrowser.open("https://venmo.com/lilow")).pack(pady=(10,0))
+        
+        ttk.Button(main_frame,
+                  text="Close",
+                  command=donation_dialog.destroy).pack(pady=(20,0))
+        
+        # Center the dialog
+        self.center_window(donation_dialog)
+
+    def center_window(self, window):
+        """Center any window on the screen"""
+        window.update_idletasks()
+        width = window.winfo_width()
+        height = window.winfo_height()
+        screen_width = window.winfo_screenwidth()
+        screen_height = window.winfo_screenheight()
+        x = (screen_width - width) // 2
+        y = (screen_height - height) // 2
+        window.geometry(f"+{x}+{y}")
 
 def main():
     try:

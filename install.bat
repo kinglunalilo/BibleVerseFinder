@@ -84,12 +84,12 @@ pause
 exit /b 0
 
 :install_app
-REM Create and enter installation directory
+REM Create installation directories
 if not exist "%INSTALL_DIR%" mkdir "%INSTALL_DIR%"
+if not exist "%INSTALL_DIR%\resources" mkdir "%INSTALL_DIR%\resources"
 cd "%INSTALL_DIR%"
-del /q *.* >nul 2>&1
 
-REM Download files with better error handling
+REM Download main program files
 echo Downloading program files...
 where git >nul 2>&1
 if %ERRORLEVEL% EQU 0 (
@@ -98,12 +98,11 @@ if %ERRORLEVEL% EQU 0 (
 ) else (
     :direct_download
     echo Using direct file download...
+    REM Download main program files to root directory
     for %%f in (search_scraper.py start.vbs __init__.py) do (
         echo Downloading %%f...
-        REM Try PowerShell first
         powershell -Command "& {try { $ProgressPreference = 'SilentlyContinue'; Invoke-WebRequest -Uri '%GITHUB_BASE%/%%f' -OutFile '%%f' -UseBasicParsing } catch { exit 1 }}"
         if not exist "%%f" (
-            REM If PowerShell fails, try curl
             echo Retrying with curl...
             curl -L -f -s "%GITHUB_BASE%/%%f" --output "%%f"
             if not exist "%%f" (
@@ -112,8 +111,22 @@ if %ERRORLEVEL% EQU 0 (
                 goto :error
             )
         )
-        echo Successfully downloaded %%f
     )
+    
+    REM Download resource files to resources directory
+    cd resources
+    for %%f in (qr.png) do (
+        echo Downloading %%f to resources folder...
+        powershell -Command "& {try { $ProgressPreference = 'SilentlyContinue'; Invoke-WebRequest -Uri '%GITHUB_BASE%/resources/%%f' -OutFile '%%f' -UseBasicParsing } catch { exit 1 }}"
+        if not exist "%%f" (
+            echo Retrying with curl...
+            curl -L -f -s "%GITHUB_BASE%/resources/%%f" --output "%%f"
+        )
+    )
+    
+    REM Create empty favorites.json in resources if it doesn't exist
+    if not exist "favorites.json" echo [] > "favorites.json"
+    cd ..
 )
 
 REM Verify downloads
