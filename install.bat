@@ -1,75 +1,177 @@
 @echo off
-echo ===== Bible Verse Finder Installation =====
+setlocal EnableDelayedExpansion
+set "LOG_FILE=install.log"
+set "PYTHON_VERSION=3.11.4"
+set "PYTHON_INSTALLER=python-%PYTHON_VERSION%-amd64.exe"
+set "INSTALL_DIR=BibleVerseFinder"
+set "GITHUB_BASE=https://raw.githubusercontent.com/kinglunalilo/BibleVerseFinder/main"
+set "REPO_URL=https://github.com/kinglunalilo/BibleVerseFinder.git"
+
+REM Quick Python check before anything else
+set "PYTHON_FOUND=0"
+python --version >nul 2>&1 && set "PYTHON_FOUND=1"
+if not "%PYTHON_FOUND%"=="1" py --version >nul 2>&1 && set "PYTHON_FOUND=1"
+if not "%PYTHON_FOUND%"=="1" if exist "C:\Python311\python.exe" set "PATH=C:\Python311;%PATH%" && set "PYTHON_FOUND=1"
+if not "%PYTHON_FOUND%"=="1" if exist "%LOCALAPPDATA%\Programs\Python\Python311\python.exe" set "PATH=%LOCALAPPDATA%\Programs\Python\Python311;%PATH%" && set "PYTHON_FOUND=1"
+
+cls
+echo ============================================
+echo    Bible Verse Finder Setup
+echo ============================================
 echo.
 
-REM Check if Python is installed
-python --version >nul 2>&1
-if %ERRORLEVEL% NEQ 0 (
-    echo ERROR: Python not found in PATH
-    echo Download from https://www.python.org/downloads/
-    echo Remember to check "Add Python to PATH" during installation
+REM Check if program is already installed
+if exist "%INSTALL_DIR%\start.vbs" (
+    echo Bible Verse Finder is already installed!
+    echo.
+    echo To run the program, please use:
+    echo  - The desktop shortcut, or
+    echo  - Double-click start.vbs in the BibleVerseFinder folder
+    echo.
+    echo You don't need to run this installer again.
+    echo.
     pause
-    exit /b 1
+    exit /b 0
 )
 
-REM Define file URLs using your GitHub repository
-set "SEARCH_SCRAPER_URL=https://raw.githubusercontent.com/kinglunalilo/BibleVerseFinder/main/search_scraper.py"
-set "START_VBS_URL=https://raw.githubusercontent.com/kinglunalilo/BibleVerseFinder/main/start.vbs"
-set "INIT_PY_URL=https://raw.githubusercontent.com/kinglunalilo/BibleVerseFinder/main/__init__.py"
+echo Checking system requirements...
+if "%PYTHON_FOUND%"=="1" (
+    echo Python %PYTHON_VERSION% is already installed.
+    echo.
+    echo Ready to install Bible Verse Finder:
+    echo  1. Download required program files
+    echo  2. Install necessary Python packages
+    echo  3. Create a desktop shortcut
+) else (
+    echo Python %PYTHON_VERSION% needs to be installed.
+    echo.
+    echo Installation steps:
+    echo  1. Install Python %PYTHON_VERSION% ^(approximately 25MB^)
+    echo  2. Download required program files
+    echo  3. Install necessary Python packages
+    echo  4. Create a desktop shortcut
+)
+echo.
+echo Note: Internet connection is required
+echo.
+echo Press any key to begin...
+pause >nul
 
-REM Create the BibleVerseFinder folder
-if not exist "BibleVerseFinder" mkdir "BibleVerseFinder"
-cd "BibleVerseFinder"
+echo ===== Bible Verse Finder Installation ===== > %LOG_FILE%
+echo %DATE% %TIME% - Starting installation... >> %LOG_FILE%
 
-REM Delete existing files (reset functionality)
-echo Resetting existing installation...
+if "%PYTHON_FOUND%"=="1" goto :install_app
+
+REM Install Python if not found
+echo Installing Python %PYTHON_VERSION%...
+echo.
+curl -L -# "https://www.python.org/ftp/python/%PYTHON_VERSION%/%PYTHON_INSTALLER%" --output "%PYTHON_INSTALLER%" || goto :error
+echo Starting Python installation... Please wait...
+echo This may take a few minutes. Do not close this window.
+start /wait "" "%PYTHON_INSTALLER%" /quiet InstallAllUsers=1 PrependPath=1
+echo Python installation in progress... Please wait...
+timeout /t 5 /nobreak >nul
+del /f /q "%PYTHON_INSTALLER%"
+
+echo.
+echo Python installation completed!
+echo ============================================
+echo IMPORTANT: Please run this installer again
+echo to complete the Bible Verse Finder setup.
+echo ============================================
+echo.
+pause
+exit /b 0
+
+:install_app
+REM Create and enter installation directory
+if not exist "%INSTALL_DIR%" mkdir "%INSTALL_DIR%"
+cd "%INSTALL_DIR%"
 del /q *.* >nul 2>&1
 
-REM Download necessary files
+REM Download files with better error handling
 echo Downloading program files...
-powershell -Command "Invoke-WebRequest -Uri '%SEARCH_SCRAPER_URL%' -OutFile 'search_scraper.py'"
-if errorlevel 1 (
-    echo ERROR: Failed to download search_scraper.py
-    pause
-    exit /b 1
+where git >nul 2>&1
+if %ERRORLEVEL% EQU 0 (
+    echo Using Git to download files...
+    git clone "%REPO_URL%" . || goto :direct_download
+) else (
+    :direct_download
+    echo Using direct file download...
+    for %%f in (search_scraper.py start.vbs __init__.py) do (
+        echo Downloading %%f...
+        REM Try PowerShell first
+        powershell -Command "& {try { $ProgressPreference = 'SilentlyContinue'; Invoke-WebRequest -Uri '%GITHUB_BASE%/%%f' -OutFile '%%f' -UseBasicParsing } catch { exit 1 }}"
+        if not exist "%%f" (
+            REM If PowerShell fails, try curl
+            echo Retrying with curl...
+            curl -L -f -s "%GITHUB_BASE%/%%f" --output "%%f"
+            if not exist "%%f" (
+                echo Failed to download %%f
+                echo Last error code: !ERRORLEVEL!
+                goto :error
+            )
+        )
+        echo Successfully downloaded %%f
+    )
 )
 
-powershell -Command "Invoke-WebRequest -Uri '%START_VBS_URL%' -OutFile 'start.vbs'"
-if errorlevel 1 (
-    echo ERROR: Failed to download start.vbs
-    pause
-    exit /b 1
+REM Verify downloads
+echo Verifying downloaded files...
+for %%f in (search_scraper.py start.vbs __init__.py) do (
+    if not exist "%%f" (
+        echo Missing required file: %%f
+        goto :error
+    )
 )
 
-powershell -Command "Invoke-WebRequest -Uri '%INIT_PY_URL%' -OutFile '__init__.py'"
-if errorlevel 1 (
-    echo ERROR: Failed to download __init__.py
-    pause
-    exit /b 1
-)
-
-REM Create favorites.json if it doesn't exist
+REM Create favorites.json if needed
 if not exist "favorites.json" echo [] > favorites.json
 
-REM Install required Python packages
+REM Install Python packages
 echo Installing required packages...
-python -m pip install requests beautifulsoup4 pyperclip fpdf2 pillow
-if errorlevel 1 (
-    echo ERROR: Package installation failed
-    pause
-    exit /b 1
-)
+python -m pip install --no-cache-dir requests beautifulsoup4 pyperclip fpdf2 pillow || goto :error
 
 REM Create desktop shortcut
 echo Creating desktop shortcut...
-echo Set WshShell = CreateObject("WScript.Shell") > CreateShortcut.vbs
-echo shortcut = WshShell.SpecialFolders("Desktop") ^& "\Bible Verse Finder.lnk" >> CreateShortcut.vbs
-echo Set lnk = WshShell.CreateShortcut(shortcut) >> CreateShortcut.vbs
-echo lnk.TargetPath = WshShell.CurrentDirectory ^& "\start.vbs" >> CreateShortcut.vbs
-echo lnk.WorkingDirectory = WshShell.CurrentDirectory >> CreateShortcut.vbs
-echo lnk.Save >> CreateShortcut.vbs
+(
+    echo Set WshShell = CreateObject^("WScript.Shell"^)
+    echo Set lnk = WshShell.CreateShortcut^(WshShell.SpecialFolders^("Desktop"^) ^& "\Bible Verse Finder.lnk"^)
+    echo lnk.TargetPath = WshShell.CurrentDirectory ^& "\start.vbs"
+    echo lnk.WorkingDirectory = WshShell.CurrentDirectory
+    echo lnk.Save
+) > CreateShortcut.vbs
 cscript //nologo CreateShortcut.vbs
 del CreateShortcut.vbs
 
+echo.
 echo Installation complete! Use the desktop shortcut or start.vbs to run the program.
-pause 
+goto :end
+
+:error
+echo.
+echo ERROR: Installation failed.
+echo Last error code: %ERRORLEVEL%
+echo Current directory: %CD%
+echo.
+echo Details:
+type %LOG_FILE% 2>nul
+echo.
+pause
+exit /b 1
+
+:end
+echo %DATE% %TIME% - Installation completed successfully >> %LOG_FILE%
+echo.
+echo ============================================
+echo Installation complete! 
+echo.
+echo To run Bible Verse Finder:
+echo  1. Use the desktop shortcut, or
+echo  2. Double-click start.vbs in the BibleVerseFinder folder
+echo.
+echo You won't need to run this installer again.
+echo ============================================
+echo.
+pause
+exit /b 0
