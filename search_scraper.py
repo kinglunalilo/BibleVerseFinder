@@ -177,11 +177,10 @@ class BibleVerseFinder:
         menubar.add_cascade(label="Favorites", menu=self.favorites_menu)
         self.update_favorites_menu()
 
-        # Add Help/About menu
+        # Add Help/About menu - removed OpenBible link
         help_menu = tk.Menu(menubar, tearoff=0)
         menubar.add_cascade(label="Help", menu=help_menu)
         help_menu.add_command(label="About", command=self.show_about)
-        help_menu.add_command(label="Visit OpenBible.info", command=lambda: webbrowser.open("https://www.openbible.info"))
 
     def create_context_menu(self):
         self.context_menu = tk.Menu(self.root, tearoff=0)
@@ -264,13 +263,17 @@ class BibleVerseFinder:
 
     def load_favorites(self):
         try:
-            with open('favorites.json', 'r') as f:
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            favorites_path = os.path.join(script_dir, "resources", "favorites.json")
+            with open(favorites_path, 'r') as f:
                 return json.load(f)
         except (FileNotFoundError, json.JSONDecodeError):
             return []
 
     def save_favorites(self):
-        with open('favorites.json', 'w') as f:
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        favorites_path = os.path.join(script_dir, "resources", "favorites.json")
+        with open(favorites_path, 'w') as f:
             json.dump(self.favorites, f)
 
     def update_favorites_menu(self):
@@ -361,6 +364,37 @@ class BibleVerseFinder:
         error_message = f"An error occurred:\n{exc_type.__name__}: {exc_value}"
         messagebox.showerror("Error", error_message)
 
+    def load_qr_code(self, frame):
+        """Helper function to load and display QR code"""
+        try:
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            qr_path = os.path.join(script_dir, "resources", "qr.png")
+            
+            if not os.path.exists(qr_path):
+                print(f"QR code not found at: {qr_path}")
+                raise FileNotFoundError(f"QR code not found at: {qr_path}")
+            
+            # Load image directly without resizing
+            qr_image = PhotoImage(file=qr_path)
+            qr_label = ttk.Label(frame, image=qr_image, cursor="hand2")
+            qr_label.image = qr_image  # Keep reference
+            qr_label.pack(pady=(0,10))
+            qr_label.bind("<Button-1>", lambda e: webbrowser.open("https://venmo.com/lilow"))
+            
+            ttk.Label(frame,
+                     text="Click QR code or scan with your phone",
+                     justify=tk.CENTER).pack()
+            
+            return True
+            
+        except Exception as e:
+            print(f"Error loading QR code from {qr_path}: {str(e)}")
+            ttk.Label(frame,
+                     text="Support via Venmo: @lilow",
+                     font=('Arial', 12),
+                     justify=tk.CENTER).pack(pady=10)
+            return False
+
     def show_about(self):
         about_dialog = tk.Toplevel(self.root)
         about_dialog.title("About Bible Verse Finder")
@@ -401,25 +435,7 @@ class BibleVerseFinder:
                   command=open_venmo).pack(side=tk.LEFT, padx=5)
         
         # If you have a Venmo QR code image
-        try:
-            script_dir = os.path.dirname(os.path.abspath(__file__))
-            qr_path = os.path.join(script_dir, "qr.png")
-            
-            if os.path.exists(qr_path):
-                qr_image = PhotoImage(file=qr_path)
-                qr_button = ttk.Label(main_frame, image=qr_image, cursor="hand2")
-                qr_button.image = qr_image
-                qr_button.pack(pady=(0,10))
-                qr_button.bind("<Button-1>", lambda e: webbrowser.open("https://venmo.com/lilow"))
-                
-                ttk.Label(main_frame,
-                         text="Click QR code or scan with your phone",
-                         justify=tk.CENTER).pack()
-        except Exception as e:
-            print(f"Error loading QR code: {e}")
-            ttk.Label(main_frame,
-                     text="Error loading QR code",
-                     justify=tk.CENTER).pack()
+        self.load_qr_code(main_frame)
         
         # Close button
         ttk.Button(main_frame,
@@ -666,30 +682,7 @@ class BibleVerseFinder:
         qr_frame.pack(pady=(0,20))
         
         # Load and display QR code
-        try:
-            script_dir = os.path.dirname(os.path.abspath(__file__))
-            qr_path = os.path.join(script_dir, "qr.png")
-            
-            if os.path.exists(qr_path):
-                # Create clickable QR code
-                qr_image = PhotoImage(file=qr_path)
-                qr_button = ttk.Label(qr_frame, image=qr_image, cursor="hand2")
-                qr_button.image = qr_image  # Keep reference
-                qr_button.pack(pady=(0,10))
-                qr_button.bind("<Button-1>", lambda e: webbrowser.open("https://venmo.com/lilow"))
-                
-                ttk.Label(qr_frame,
-                         text="Click QR code or scan with your phone",
-                         justify=tk.CENTER).pack()
-            else:
-                ttk.Label(qr_frame,
-                         text="QR code not found",
-                         justify=tk.CENTER).pack()
-        except Exception as e:
-            print(f"Error loading QR code: {e}")
-            ttk.Label(qr_frame,
-                     text="Error loading QR code",
-                     justify=tk.CENTER).pack()
+        self.load_qr_code(qr_frame)
         
         # Regular Venmo button as backup
         ttk.Button(main_frame,

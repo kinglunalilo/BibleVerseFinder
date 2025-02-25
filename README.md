@@ -23,7 +23,7 @@ If you prefer to manually set up the program:
    - search_scraper.py
    - start.vbs
    - __init__.py
-3. Create an empty `favorites.json` file with content: `[]`
+3. Create an empty `resources/favorites.json` file with content: `[]`
 4. Install required packages:
    ```
    pip install requests beautifulsoup4 pyperclip fpdf2 pillow
@@ -33,48 +33,8 @@ If you prefer to manually set up the program:
 - search_scraper.py - Main program file
 - start.vbs - Program launcher
 - __init__.py - Package initialization
-- favorites.json - Saves your favorite verses
+- resources/favorites.json - Saves your favorite verses
+- resources/qr.png - Venmo QR code
 
-## Running the Program
-- Use the desktop shortcut (if installed with Option 1)
-- OR double-click `start.vbs`
-
-## Features
-- Search Bible verses
-- Save favorite verses
-- Export verses to PDF
-- Copy verses to clipboard
-- Simple VBS interface
-
-## Troubleshooting
-- If the program won't start, ensure Python is in your system PATH
-- Check that all required packages are installed
-- Verify all files are in the same directory
-
-## Support the Project
-If you find this tool helpful, consider supporting its development:
-
-- Venmo: @lilow
-- Or scan the QR code in the program's About dialog
-
-## Requirements
-- Windows 7 or higher
-- Python 3.11.4 or higher
-- Internet connection for verse searches
-- 50MB free disk space
-
-## License
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
-## Support
-For issues or questions, please open an issue in this repository.
-
-## Support the Developer
-
-If you find this application helpful and would like to support its development, you can donate through Venmo:
-
-![Venmo QR Code](qr.png)
-
-Or visit: [https://venmo.com/lilow](https://venmo.com/lilow)
-
-Your support helps maintain and improve this application. Thank you! 🙏
+## Directory Structure
+```

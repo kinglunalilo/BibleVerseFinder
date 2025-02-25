@@ -21,72 +21,6 @@ End If
 ' Change to script directory
 objShell.CurrentDirectory = strCurrentDir
 
-' Check for Python updates
-Set objHTTP = CreateObject("MSXML2.XMLHTTP")
-strGitHubAPI = "https://api.github.com/repos/kinglunalilo/BibleVerseFinder/commits/main"
-strGitHubRaw = "https://raw.githubusercontent.com/kinglunalilo/BibleVerseFinder/main/"
-
-' Update check file should be in resources folder
-strHashFile = objFSO.BuildPath(strResourcesDir, "last_commit.txt")
-strLocalHash = ""
-
-If objFSO.FileExists(strHashFile) Then
-    Set objFile = objFSO.OpenTextFile(strHashFile, 1)
-    strLocalHash = objFile.ReadLine()
-    objFile.Close()
-End If
-
-' Check for updates
-On Error Resume Next
-objHTTP.Open "GET", strGitHubAPI, False
-objHTTP.setRequestHeader "User-Agent", "BibleVerseFinder-UpdateChecker"
-objHTTP.send
-
-If objHTTP.Status = 200 Then
-    strResponse = objHTTP.responseText
-    intStart = InStr(strResponse, """sha"":""") + 8
-    intEnd = InStr(intStart, strResponse, """") - 1
-    strRemoteHash = Mid(strResponse, intStart, intEnd - intStart + 1)
-    
-    If strLocalHash <> strRemoteHash Then
-        objShell.Popup "Updates found! Downloading latest version...", 2, "Bible Verse Finder Update", 64
-        
-        ' Update files
-        For Each strFile in Array("search_scraper.py", "__init__.py")
-            objHTTP.Open "GET", strGitHubRaw & strFile, False
-            objHTTP.send
-            
-            If objHTTP.Status = 200 Then
-                strFilePath = objFSO.BuildPath(strCurrentDir, strFile)
-                Set objFile = objFSO.OpenTextFile(strFilePath, 2, True)
-                objFile.Write objHTTP.responseText
-                objFile.Close
-            End If
-        Next
-        
-        ' Update resources
-        objHTTP.Open "GET", strGitHubRaw & "resources/qr.png", False
-        objHTTP.send
-        If objHTTP.Status = 200 Then
-            strQRPath = objFSO.BuildPath(strResourcesDir, "qr.png")
-            Set objStream = CreateObject("ADODB.Stream")
-            objStream.Type = 1 ' Binary
-            objStream.Open
-            objStream.Write objHTTP.responseBody
-            objStream.SaveToFile strQRPath, 2 ' Overwrite
-            objStream.Close
-        End If
-        
-        ' Save new hash
-        Set objFile = objFSO.OpenTextFile(strHashFile, 2, True)
-        objFile.Write strRemoteHash
-        objFile.Close
-        
-        objShell.Popup "Update complete!", 2, "Bible Verse Finder Update", 64
-    End If
-End If
-On Error Goto 0
-
 ' Create empty favorites.json if it doesn't exist
 strFavoritesPath = objFSO.BuildPath(strResourcesDir, "favorites.json")
 If Not objFSO.FileExists(strFavoritesPath) Then
@@ -132,6 +66,5 @@ Else
 End If
 
 If launchSuccess Then
-    ' Only write to log if we want to track successful launches
-    ' LogError "Application launched successfully"
+    LogError "Application launched successfully"
 End If
