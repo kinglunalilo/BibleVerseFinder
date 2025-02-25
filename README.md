@@ -50,3 +50,34 @@ If you have Git installed:
 - resources/qr.png - Venmo QR code
 
 ## Directory Structure
+```
+BibleVerseFinder/
+├── search_scraper.py   # Main program file
+├── start.vbs          # Program launcher
+├── __init__.py       # Package initialization
+├── install.bat       # Installation script
+├── LICENSE          # MIT license with donation clause
+└── resources/
+    ├── favorites.json   # Saved verses
+    ├── error_log.txt   # Application logs
+    └── qr.png          # Donation QR code
+```
+
+## Usage
+1. Launch the application using the desktop shortcut or `start.vbs`
+2. Type a topic in the search box (e.g., "love", "faith", "hope")
+3. Click "Search" or press Enter
+4. Right-click on verses to:
+   - Copy verse text
+   - Save to favorites
+   - Export to PDF/TXT
+
+## Support Development
+If you find this tool helpful, consider supporting its development:
+
+- Scan the QR code in the app's About section
+- Visit my [Venmo profile](https://venmo.com/kinglunalilo)
+- Share the app with others
+
+## License
+This project is licensed under the MIT License with an additional clause regarding donations - see the [LICENSE](LICENSE) file for details.
