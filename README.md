@@ -75,9 +75,30 @@ BibleVerseFinder/
 ## Support Development
 If you find this tool helpful, consider supporting its development:
 
-- Scan the QR code in the app's About section
-- Visit my [Venmo profile](https://venmo.com/kinglunalilo)
+- Scan the QR code below or in the app's About section
+- Visit my [Venmo profile](https://venmo.com/lilow)
 - Share the app with others
+
+![Venmo QR Code](resources/qr.png)
+
+Thank you for your support! 🙏 Your donation helps keep this project alive.
+
+## Roadmap 🛣️
+Future development will focus on deeper biblical understanding:
+
+### Planned Features
+- Windows executable for easier installation
+- Tools for studying complex biblical topics:
+  - End times prophecies
+  - Biblical mysteries
+  - Difficult passages explained
+  - Revelation study aids
+  - Greek word interpretations
+  - Cross-reference analysis
+- Advanced search capabilities
+- Mobile version (future)
+
+Stay tuned and ⭐ star the repository for updates!
 
 ## License
 This project is licensed under the MIT License with an additional clause regarding donations - see the [LICENSE](LICENSE) file for details.
