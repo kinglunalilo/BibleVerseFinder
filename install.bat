@@ -1,11 +1,14 @@
 @echo off
 setlocal EnableDelayedExpansion
-set "LOG_FILE=install.log"
 set "PYTHON_VERSION=3.11.4"
 set "PYTHON_INSTALLER=python-%PYTHON_VERSION%-amd64.exe"
 set "INSTALL_DIR=BibleVerseFinder"
 set "GITHUB_BASE=https://raw.githubusercontent.com/kinglunalilo/BibleVerseFinder/main"
 set "REPO_URL=https://github.com/kinglunalilo/BibleVerseFinder.git"
+
+REM Use PowerShell for logging
+powershell -Command "Write-EventLog -LogName Application -Source 'BibleVerseFinder' -EntryType Information -EventId 1 -Message 'Starting installation...'" 2>nul
+if errorlevel 1 powershell -Command "New-EventLog -LogName Application -Source 'BibleVerseFinder'; Write-EventLog -LogName Application -Source 'BibleVerseFinder' -EntryType Information -EventId 1 -Message 'Starting installation...'"
 
 REM Quick Python check before anything else
 set "PYTHON_FOUND=0"
@@ -56,9 +59,6 @@ echo Note: Internet connection is required
 echo.
 echo Press any key to begin...
 pause >nul
-
-echo ===== Bible Verse Finder Installation ===== > %LOG_FILE%
-echo %DATE% %TIME% - Starting installation... >> %LOG_FILE%
 
 if "%PYTHON_FOUND%"=="1" goto :install_app
 
@@ -167,14 +167,12 @@ echo ERROR: Installation failed.
 echo Last error code: %ERRORLEVEL%
 echo Current directory: %CD%
 echo.
-echo Details:
-type %LOG_FILE% 2>nul
-echo.
+powershell -Command "Write-EventLog -LogName Application -Source 'BibleVerseFinder' -EntryType Error -EventId 2 -Message 'Installation failed with error code: %ERRORLEVEL%'"
 pause
 exit /b 1
 
 :end
-echo %DATE% %TIME% - Installation completed successfully >> %LOG_FILE%
+powershell -Command "Write-EventLog -LogName Application -Source 'BibleVerseFinder' -EntryType Information -EventId 3 -Message 'Installation completed successfully'"
 echo.
 echo ============================================
 echo Installation complete! 

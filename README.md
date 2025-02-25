@@ -1,30 +1,43 @@
 # Bible Verse Finder
 
-A simple tool to search, save, and export Bible verses.
+A desktop application for searching, saving, and exporting Bible verses from the English Standard Version (ESV).
 
-## Installation Options
+## Features
+- Search Bible verses by topic
+- Random topic suggestions
+- Save favorite verses
+- Export verses to PDF or TXT
+- Right-click context menu
+- Search history
+- Modern, user-friendly interface
 
-### Option 1: Automatic Installation (Recommended)
-1. Download `install.bat`
+## Installation
+
+### Option 1: Quick Install (Windows)
+1. Download `install.bat` from the [releases page](https://github.com/kinglunalilo/BibleVerseFinder/releases)
 2. Double-click to run the installer
 3. Follow the on-screen instructions
 
 The installer will:
-- Install Python 3.11.4 if needed
-- Download all required files
-- Install necessary Python packages
+- Check for/install Python 3.11.4
+- Download required files
+- Install dependencies
 - Create a desktop shortcut
 
-### Option 2: Manual Installation
-If you prefer to manually set up the program:
+### Option 2: Git Clone (For Developers)
+If you have Git installed:
 
 1. Ensure Python 3.11.4 or higher is installed
-2. Download these required files:
-   - search_scraper.py
-   - start.vbs
-   - __init__.py
-3. Create an empty `resources/favorites.json` file with content: `[]`
-4. Install required packages:
+2. Clone the repository:
+   ```
+   git clone https://github.com/kinglunalilo/BibleVerseFinder.git
+   ```
+3. Navigate to the project directory:
+   ```
+   cd BibleVerseFinder
+   ```
+4. Create an empty `resources/favorites.json` file with content: `[]`
+5. Install required packages:
    ```
    pip install requests beautifulsoup4 pyperclip fpdf2 pillow
    ```
@@ -37,4 +50,3 @@ If you prefer to manually set up the program:
 - resources/qr.png - Venmo QR code
 
 ## Directory Structure
-```

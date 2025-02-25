@@ -20,6 +20,14 @@ class BibleVerseFinder:
         # Center the main window
         self.center_window(self.root)
         
+        self.colors = {
+            'primary': '#2c3e50',      # Dark blue-gray
+            'secondary': '#3498db',     # Bright blue
+            'background': '#ecf0f1',    # Light gray
+            'text': '#2c3e50',         # Dark blue-gray
+            'accent': '#e74c3c'        # Red for important elements
+        }
+        
         # Initialize history and favorites
         self.search_history = []
         self.favorites = self.load_favorites()
@@ -30,6 +38,16 @@ class BibleVerseFinder:
         # Create main frame with padding
         self.main_frame = ttk.Frame(self.root, padding="20")
         self.main_frame.pack(fill=tk.BOTH, expand=True)
+        
+        style = ttk.Style()
+        style.configure('TFrame', background=self.colors['background'])
+        style.configure('TLabel', 
+                       background=self.colors['background'], 
+                       foreground=self.colors['text'])
+        style.configure('TButton', 
+                       padding=(10, 5))
+        style.configure('Accent.TButton',
+                       padding=(10, 5))
         
         # Create menu bar
         self.create_menu()
@@ -50,7 +68,7 @@ class BibleVerseFinder:
         self.search_entry = ttk.Entry(self.search_frame, width=40, font=('Arial', 12))
         self.search_entry.pack(side=tk.LEFT, padx=(0, 10))
         
-        # Button frame for alignment
+        # Button frame
         button_frame = ttk.Frame(self.search_frame)
         button_frame.pack(side=tk.LEFT)
         
@@ -91,6 +109,16 @@ class BibleVerseFinder:
         )
         self.results_area.pack(fill=tk.BOTH, expand=True)
         
+        # Style results area
+        self.results_area.configure(
+            background='white',
+            foreground=self.colors['text'],
+            selectbackground=self.colors['secondary'],
+            selectforeground='white',
+            padx=10,
+            pady=10
+        )
+        
         # Create right-click menu
         self.create_context_menu()
         
@@ -110,12 +138,12 @@ class BibleVerseFinder:
             'Connection': 'keep-alive',
             'Upgrade-Insecure-Requests': '1',
         })
-
+        
         # Add after other initializations
         self.suggested_topics = {
             'Life Challenges': [
                 'anxiety', 'stress', 'depression', 'fear', 'worry', 'anger',
-                'loneliness', 'patience', 'peace', 'strength'
+                'loneliness', 'patience', 'peace', 'strength', 'courage'
             ],
             'Relationships': [
                 'love', 'marriage', 'family', 'friendship', 'forgiveness',
@@ -148,6 +176,9 @@ class BibleVerseFinder:
         style.configure('Donation.TButton', 
                        font=('Arial', 10),
                        foreground='#d62828')
+        
+        # Add hover effects for buttons
+        self.bind_hover_effects()
 
     def create_menu(self):
         menubar = tk.Menu(self.root)
@@ -176,14 +207,21 @@ class BibleVerseFinder:
         self.favorites_menu = tk.Menu(menubar, tearoff=0)
         menubar.add_cascade(label="Favorites", menu=self.favorites_menu)
         self.update_favorites_menu()
-
+        
         # Add Help/About menu - removed OpenBible link
         help_menu = tk.Menu(menubar, tearoff=0)
         menubar.add_cascade(label="Help", menu=help_menu)
         help_menu.add_command(label="About", command=self.show_about)
 
     def create_context_menu(self):
-        self.context_menu = tk.Menu(self.root, tearoff=0)
+        self.context_menu = tk.Menu(
+            self.root,
+            tearoff=0,
+            bg='white',
+            fg=self.colors['text'],
+            activebackground=self.colors['secondary'],
+            activeforeground='white'
+        )
         self.context_menu.add_command(label="Copy", command=self.copy_selected)
         self.context_menu.add_command(label="Add Verse to Favorites", command=self.add_to_favorites)
         
@@ -218,7 +256,6 @@ class BibleVerseFinder:
                     self.results_area.tag_remove("sel", "1.0", "end")
                     self.results_area.tag_add("sel", ref_start[0], verse_end)
                     break
-                
                 start_index = verse_end
             
             self.context_menu.tk_popup(event.x_root, event.y_root)
@@ -278,7 +315,6 @@ class BibleVerseFinder:
 
     def update_favorites_menu(self):
         self.favorites_menu.delete(0, tk.END)
-        
         if not self.favorites:
             self.favorites_menu.add_command(
                 label="No favorites yet",
@@ -298,7 +334,6 @@ class BibleVerseFinder:
                 label=menu_text,
                 menu=fav_menu
             )
-            
             # Add options to the submenu
             fav_menu.add_command(
                 label="Show Verse",
@@ -369,7 +404,6 @@ class BibleVerseFinder:
         try:
             script_dir = os.path.dirname(os.path.abspath(__file__))
             qr_path = os.path.join(script_dir, "resources", "qr.png")
-            
             if not os.path.exists(qr_path):
                 print(f"QR code not found at: {qr_path}")
                 raise FileNotFoundError(f"QR code not found at: {qr_path}")
@@ -386,7 +420,6 @@ class BibleVerseFinder:
                      justify=tk.CENTER).pack()
             
             return True
-            
         except Exception as e:
             print(f"Error loading QR code from {qr_path}: {str(e)}")
             ttk.Label(frame,
@@ -399,7 +432,13 @@ class BibleVerseFinder:
         about_dialog = tk.Toplevel(self.root)
         about_dialog.title("About Bible Verse Finder")
         about_dialog.geometry("400x600")
-        about_dialog.resizable(False, False)
+        about_dialog.configure(bg=self.colors['background'])
+        
+        # Add rounded corners and shadows (where supported)
+        try:
+            about_dialog.attributes('-alpha', 0.95)  # Slight transparency
+        except:
+            pass
         
         # Add padding frame
         main_frame = ttk.Frame(about_dialog, padding="20")
@@ -418,7 +457,7 @@ class BibleVerseFinder:
                  justify=tk.CENTER).pack(pady=(0,20))
         
         # Donation section
-        ttk.Label(main_frame,
+        ttk.Label(main_frame, 
                  text="Support this project",
                  font=('Arial', 12, 'bold')).pack(pady=(0,10))
         
@@ -446,19 +485,23 @@ class BibleVerseFinder:
         self.center_window(about_dialog)
 
     def perform_search(self):
+        # Show progress bar with themed colors
+        self.progress.configure(
+            style='Horizontal.TProgressbar',
+            background=self.colors['secondary']
+        )
         # Show progress bar
         self.progress.pack()
         self.progress.start(10)
         self.search_button.config(state='disabled')
         self.root.update_idletasks()
-
+        
         try:
             # Enable temporarily to clear and update text
             self.results_area.config(state='normal')
             
             # Clear previous results
             self.results_area.delete(1.0, tk.END)
-            
             search_term = self.search_entry.get().strip()
             
             if not search_term:
@@ -493,7 +536,7 @@ class BibleVerseFinder:
             print(f"Found {len(verses)} verses")  # Debug print
             
             if verses:
-                # Add title only
+                # Add title
                 self.results_area.insert(tk.END, f"Bible Verses About {search_term.title()}\n", "title")
                 self.results_area.insert(tk.END, "All verses from English Standard Version (ESV)\n\n", "note")
                 
@@ -567,17 +610,15 @@ class BibleVerseFinder:
                 filetypes=file_types,
                 initialfile=default_filename
             )
-            
             if not filename:
                 return
-                
+            
             if format == "pdf":
                 self.export_to_pdf(verses, filename)
             else:
                 self.export_to_txt(verses, filename)
                 
             messagebox.showinfo("Export", f"Successfully exported to {filename}")
-            
         except Exception as e:
             messagebox.showerror("Export Error", f"Error during export: {str(e)}")
 
@@ -595,7 +636,7 @@ class BibleVerseFinder:
             verse_range = self.results_area.tag_nextrange("verse_text", ref_range[1])
             if not verse_range:
                 break
-            
+                
             # Get the text
             ref = self.results_area.get(ref_range[0], ref_range[1]).strip()
             verse = self.results_area.get(verse_range[0], verse_range[1]).strip()
@@ -631,14 +672,13 @@ class BibleVerseFinder:
             pdf.set_font("Arial", size=12)  # Normal for verse
             pdf.multi_cell(0, 10, verse)
             pdf.ln(5)
-        
+                
         pdf.output(filename)
 
     def export_to_txt(self, verses, filename):
         with open(filename, 'w', encoding='utf-8') as f:
             title = "Bible Verses" if filename.endswith("bible_verses.txt") else "Favorite Verses"
             f.write(f"{title}\n\n")
-            
             for ref, verse in verses:
                 f.write(f"{ref}\n{verse}\n\n")
 
@@ -673,7 +713,7 @@ class BibleVerseFinder:
                  text="Support this Project",
                  font=('Arial', 16, 'bold')).pack(pady=(0,10))
         
-        ttk.Label(main_frame,
+        ttk.Label(main_frame, 
                  text="Your support helps maintain and improve\nthis Bible study tool.",
                  justify=tk.CENTER).pack(pady=(0,20))
         
@@ -706,6 +746,18 @@ class BibleVerseFinder:
         x = (screen_width - width) // 2
         y = (screen_height - height) // 2
         window.geometry(f"+{x}+{y}")
+
+    def bind_hover_effects(self):
+        """Add hover effects to buttons"""
+        def on_enter(e):
+            e.widget.configure(style='Accent.TButton')
+            
+        def on_leave(e):
+            e.widget.configure(style='TButton')
+            
+        for button in [self.search_button, self.random_button]:
+            button.bind('<Enter>', on_enter)
+            button.bind('<Leave>', on_leave)
 
 def main():
     try:
